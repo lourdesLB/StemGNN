@@ -1,3 +1,7 @@
+# Own ignores
+stemgnn-env/
+
+# Repo ignores
 __pycache__/
 *.py[cod]
 *$py.class

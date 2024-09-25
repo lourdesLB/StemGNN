@@ -8,7 +8,7 @@ import torch.nn as nn
 import torch.utils.data as torch_data
 import numpy as np
 import time
-import os
+import os, sys
 
 from utils.math_utils import evaluate
 
@@ -101,6 +101,8 @@ def validate(model, dataloader, device, normalize_method, statistic,
 
 
 def train(train_data, valid_data, args, result_file):
+
+    print("################ TRAINING MODEL ################")
     node_cnt = train_data.shape[1]
     model = Model(node_cnt, 2, args.window_size, args.multi_layer, horizon=args.horizon)
     model.to(args.device)
@@ -110,6 +112,7 @@ def train(train_data, valid_data, args, result_file):
         raise Exception('Cannot organize enough validation data')
 
     if args.norm_method == 'z_score':
+        
         train_mean = np.mean(train_data, axis=0)
         train_std = np.std(train_data, axis=0)
         normalize_statistic = {"mean": train_mean.tolist(), "std": train_std.tolist()}
@@ -150,11 +153,14 @@ def train(train_data, valid_data, args, result_file):
     validate_score_non_decrease_count = 0
     performance_metrics = {}
     for epoch in range(args.epoch):
+        print("Epoch: ", epoch)
         epoch_start_time = time.time()
         model.train()
         loss_total = 0
         cnt = 0
         for i, (inputs, target) in enumerate(train_loader):
+            print(".", end="")
+            sys.stdout.flush()
             inputs = inputs.to(args.device)
             target = target.to(args.device)
             model.zero_grad()
@@ -192,6 +198,8 @@ def train(train_data, valid_data, args, result_file):
 
 
 def test(test_data, args, result_train_file, result_test_file):
+    print("################ TESTING MODEL ################")
+    
     with open(os.path.join(result_train_file, 'norm_stat.json'),'r') as f:
         normalize_statistic = json.load(f)
     model = load_model(result_train_file)
