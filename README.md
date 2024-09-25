@@ -43,7 +43,7 @@ Since complex data cleansing is needed on the above datasets provided in the url
 The training procedure and evaluation procedure are all included in the `main.py`. To train and evaluate on some dataset, run the following command:
 
 ```train & evaluate
-python main.py --train True --evaluate True --dataset <name of csv file> --output_dir <path to output directory> --n_route <number of nodes> --window_size <length of sliding window> --horizon <predict horizon> --norm_method z_score --train_length 7 --validate_length 2 --test_length 1
+python main.py --train True --evaluate True --dataset <name of csv file without .csv> --valid_length 2 --window_size <length of sliding window> --horizon <predict horizon> --norm_method z_score --train_length 7 --test_length 1
 ```
 
 The detailed descriptions about the parameters are as following:
