@@ -1,9 +1,72 @@
-# Spectral Temporal Graph Neural Network for Multivariate Time-series Forecasting
+# Spectral Temporal Graph Neural Network for Multivariate Time-series Forecasting:
+
+---
+
+## How to Make It Work on Cluster
+
+**Step 1:** Clone the GitHub repository.
+```bash
+cd $HOME                                            # Navigate to your home directory
+git clone https://github.com/lourdesLB/StemGNN.git  # Clone the repository
+cd StemGNN                                          # Change into the StemGNN directory
+```
+
+**Step 2:** Prepare Python dependencies.
+```bash
+python -m venv stemgnn-env          # Create virtual environment
+source stemgnn-env/bin/activate     # Activate environment
+pip install -r requirements.txt     # Install Python dependencies (torch)
+```
+
+**Step 3:** Create an experiment script to launch the job and run it.
+```bash
+mkdir logs
+nano run_experiment_gpu.sh
+```
+
+Write the following content, substituting `userName` with your username on the cluster:
+
+```bash
+#!/bin/bash
+#SBATCH --job-name=experimentation-stemgnn
+#SBATCH --nodes=1
+#SBATCH -o logs/experiments.%j.out
+#SBATCH --ntasks=1
+#SBATCH --cpus-per-task=1
+#SBATCH --mem=8G
+#SBATCH --gpus=a40
+#SBATCH --time=72:00:00
+
+# Load the required modules
+source /etc/profile
+
+USERNAME=your_user_name             # Replace with your actual username
+
+# Configure the environment
+source /home/$USERNAME/StemGNN/stemgnn-env/bin/activate
+export PYTHONPATH=":/home/$USERNAME/StemGNN/stemgnn-env/lib"
+echo $PYTHONPATH
+
+# Run the experiments script
+python main.py --train True --evaluate True --dataset PeMS07 --window_size 12 --horizon 3 --norm_method z_score --train_length 7 --test_length 1 --device cuda:0
+```
+
+Then submit the job:
+
+```bash
+sbatch run_experiments_gpu.sh
+```
+
+**Step 4:**  Check the status of the experiments by opening the file `logs/experiments.experimentID.out`, where `experimentID` is the job number returned when you executed sbatch run_experiment_gpu.sh.
+
+---
+
+## Original README
 
 This repository is the official implementation of Spectral Temporal Graph Neural Network for
 Multivariate Time-series Forecasting.
 
-## Requirements
+### Requirements
 
 Recommended version of OS & Python:
 
@@ -19,7 +82,7 @@ pip install --upgrade pip
 pip install -r requirements.txt
 ```
 
-## Datasets
+### Datasets
 
 [PEMS03](http://pems.dot.ca.gov/?dnode=Clearinghouse&type=station_5min&district_id=3&submit=Submit),
 [PEMS04](http://pems.dot.ca.gov/?dnode=Clearinghouse&type=station_5min&district_id=4&submit=Submit),
@@ -38,7 +101,7 @@ The input csv file should contain **no header** and its **shape should be `T*N`*
 
 Since complex data cleansing is needed on the above datasets provided in the urls before fed into the StemGNN model, we provide a cleaned version of ECG5000 ([./dataset/ECG_data.csv](./dataset/ECG_data.csv)) for reproduction convenience. The ECG_data.csv is in shape of `5000*140`, where `5000` denotes number of timestamps and `140` denotes total number of nodes. Run command `python main.py` to trigger training and evaluation on ECG_data.csv.
 
-## Training and Evaluation
+### Training and Evaluation
 
 The training procedure and evaluation procedure are all included in the `main.py`. To train and evaluate on some dataset, run the following command:
 
